@@ -1,0 +1,8 @@
+eclipse.preferences.version=1
+environment/project/cdt.managedbuild.config.gnu.exe.debug.20148564/append=true
+environment/project/cdt.managedbuild.config.gnu.exe.debug.20148564/appendContributed=true
+environment/project/cdt.managedbuild.config.gnu.exe.release.502161016/CMD/delimiter=\:
+environment/project/cdt.managedbuild.config.gnu.exe.release.502161016/CMD/operation=append
+environment/project/cdt.managedbuild.config.gnu.exe.release.502161016/CMD/value=${LD_LIBRARY_PATH}
+environment/project/cdt.managedbuild.config.gnu.exe.release.502161016/append=true
+environment/project/cdt.managedbuild.config.gnu.exe.release.502161016/appendContributed=true
