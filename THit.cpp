@@ -7,8 +7,8 @@
 
 #include "THit.h"
 
-THit::THit(double phi_in) {
-	phiSim = phi_in;
-	phiDet = 0;
+THit::THit(float phi, float eta) {
+	this->phi = phi;
+	this->eta = eta;
 }
 

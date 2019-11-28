@@ -15,6 +15,7 @@ using namespace std;
 
 class TInputParams {
 public:
+	uint16_t iharm0;
 	uint32_t nEvents;
 	vector<TInputCentralityClass*> vCentClass;
 	TInputParams();

@@ -12,18 +12,17 @@
 
 class THarm {
 public:
-	double vSim;
-	double vReco;
-	double dvSim;
-	double psiSim;
-	double psiReco;
+	double v;
+	double dv;
+	double psi;
 	double qx;
 	double qy;
-	double r; // event plane resolution for subevent (half of hits)
-	TF1* fSim;
+	double r;
+	TF1* f;
 
 	THarm();
 	~THarm();
+	void Reset();
 };
 
 #endif /* THARM_H_ */

@@ -10,9 +10,9 @@
 
 class THit {
 public:
-	double phiSim;
-	double phiDet;
-	THit(double phi_in);
+	float phi;
+	float eta;
+	THit(float phi, float eta);
 };
 
 #endif /* THIT_H_ */

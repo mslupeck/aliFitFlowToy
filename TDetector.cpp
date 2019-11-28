@@ -7,90 +7,20 @@
 
 #include "TDetector.h"
 
-TCell::TCell(float phi0, float phi1){
-	nch = 0;
-	SetPhiRange(phi0, phi1);
+TDetector::TDetector(std::string type, TInputParams *par, float eff) {
+	this->type = type;
+	this->par = par;
+	this->efficiency = eff;
+	InitGeo();
+	FindMaxMinEta();
+	InitHarmonics();
 }
 
-void TCell::SetPhiRange(float phi0, float phi1){
-	this->phi0 = phi0;
-	this->phi1 = phi1;
+TDetector::~TDetector() {
+	DestroyHarmonics();
 }
 
-float TCell::GetPhi0(){
-	return phi0;
-}
-
-float TCell::GetPhi1(){
-	return phi1;
-}
-
-void TCell::IncNch(){
-	nch++;
-}
-
-int32_t TCell::GetNch(){
-	return nch;
-}
-
-
-
-
-TRing::TRing(float r0, float r1, float z) {
-	SetRadiusRange(r0, r1);
-	SetZ(z);
-	CalculateEtaRange();
-}
-
-void TRing::SetZ(float z){
-	this->z = z;
-}
-
-void TRing::SetRadiusRange(float r0, float r1){
-	this->r0 = r0;
-	this->r1 = r1;
-}
-
-void TRing::CalculateEtaRange(){
-	float theta0 = atan2(r0,z);
-	float theta1 = atan2(r1,z);
-	eta0 = -log(tan(0.5*theta0));
-	eta1 = -log(tan(0.5*theta1));
-}
-
-float TRing::GetEta0() const{
-	return eta0;
-}
-
-float TRing::GetEta1() const{
-	return eta1;
-}
-
-void TRing::CreateCells(uint16_t nCells){
-	double dphi = 2.0*M_PI/nCells;
-	for(uint16_t icell=0; icell<nCells; icell++){
-		TCell* c = new TCell(dphi*icell, dphi*(icell+1));
-		vCells.push_back(c);
-	}
-}
-
-const std::vector<TCell*>& TRing::GetCells() const{
-	return vCells;
-}
-
-void TRing::IncCellValue(uint16_t nCell){
-	if(nCell < vCells.size()){
-		vCells.at(nCell)->IncNch();
-	}
-	else{
-		std::cout << "<E> TSector::SetCell(): too large cell number: " << nCell << " >= " << vCells.size() << std::endl;
-	}
-}
-
-
-
-
-TDetector::TDetector(std::string type) {
+int TDetector::InitGeo(){
 	if(type.compare("V0A_1x8") == 0){
 		AddRing(4.3, 41.2, 329, 8);
 	}
@@ -109,9 +39,70 @@ TDetector::TDetector(std::string type) {
 		AddRing(11.9, 19.3, -88, 8);
 		AddRing(19.5, 32.0, -88, 8);
 	}
-	else{
-		std::cout << "<E> TDetector::TDetector(): No geometry initialized." << std::endl;
+	else if(type.compare("TPC") == 0){
+		AddRing(2466,1e8,2497,180);
+		AddRing(2466,1e8,-2497,180);
 	}
+	else{
+		std::cout << "<E> TDetector::TDetector(): Empty geometry initialized: " << type << std::endl;
+		return -1;
+	}
+	return 0;
+}
+
+void TDetector::FindMaxMinEta(){
+	minEta = 1e30;
+	maxEta = -1e30;
+	for(uint16_t iring=0; iring<vRings.size(); iring++){
+		TRing* r = vRings.at(iring);
+		float eta0 = r->GetEta0();
+		float eta1 = r->GetEta1();
+		if(eta0 < minEta){
+			minEta = eta0;
+		}
+		if(eta1 > maxEta){
+			maxEta = eta1;
+		}
+		//std::cout << "  <I> TDetector::FindMaxMinEta(): " << iring << " " << eta0 << " " << eta1 << " | " << minEta << " " << maxEta << std::endl;
+	}
+}
+
+void TDetector::InitHarmonics(){
+	for(uint16_t iharm=0; iharm<par->vCentClass.at(0)->vv.size(); iharm++){
+		vHarmReco.push_back(new THarm());
+	}
+}
+
+void TDetector::DestroyHarmonics(){
+	for(uint16_t iharm=0; iharm<vHarmReco.size(); iharm++){
+		delete vHarmReco.at(iharm);
+	}
+}
+
+float TDetector::GetMaxEta() const{
+	return maxEta;
+}
+
+float TDetector::GetMinEta() const{
+	return minEta;
+}
+
+float TDetector::GetEff() const{
+	return efficiency;
+}
+
+std::string& TDetector::GetType() {
+	return type;
+}
+
+uint32_t TDetector::GetTotNch(){
+	uint32_t nch=0;
+	for(uint16_t iring=0; iring<vRings.size(); iring++){
+		for(uint16_t icell=0; icell<vRings.at(iring)->GetCells().size(); icell++){
+			nch += vRings.at(iring)->GetCells().at(icell)->GetNch();
+		}
+	}
+	return nch;
 }
 
 void TDetector::AddRing(float r0, float r1, float z, uint16_t nCells){
@@ -131,4 +122,64 @@ void TDetector::IncCellValue(uint16_t nRing, uint16_t nCell){
 	else{
 		std::cout << "<E> TDetector::SetCell(): too large sector number: " << nRing << " >= " << vRings.size() << std::endl;
 	}
+}
+
+void TDetector::ResetAllCells(){
+	for(uint16_t iring=0; iring<vRings.size(); iring++){
+		for(uint16_t icell=0; icell<vRings.at(iring)->GetCells().size(); icell++){
+			vRings.at(iring)->GetCells().at(icell)->ResetNch();
+		}
+	}
+}
+
+const std::vector<THarm*>& TDetector::GetHarmReco() const{
+	return vHarmReco;
+}
+
+void TDetector::AddQ(uint16_t iharm, double addx, double addy){
+	if(iharm < vHarmReco.size()){
+		vHarmReco.at(iharm)->qx += addx;
+		vHarmReco.at(iharm)->qy += addy;
+	}
+	else{
+		std::cout << "<E> TDetector::AddQx(): too large harmonic number: " << iharm << " >= " << vHarmReco.size() << std::endl;
+	}
+}
+
+void TDetector::DivQ(uint16_t iharm, double divx, double divy){
+	if(iharm < vHarmReco.size()){
+		vHarmReco.at(iharm)->qx /= divx;
+		vHarmReco.at(iharm)->qy /= divy;
+	}
+	else{
+		std::cout << "<E> TDetector::DivQx(): too large harmonic number: " << iharm << " >= " << vHarmReco.size() << std::endl;
+	}
+}
+
+void TDetector::SetPsiReco(uint16_t iharm, double psi){
+	if(iharm < vHarmReco.size()){
+		vHarmReco.at(iharm)->psi = psi;
+	}
+	else{
+		std::cout << "<E> TDetector::SetPsi(): too large harmonic number: " << iharm << " >= " << vHarmReco.size() << std::endl;
+	}
+}
+
+void TDetector::SetRReco(uint16_t iharm, double r){
+	if(iharm < vHarmReco.size()){
+		vHarmReco.at(iharm)->r = r;
+	}
+	else{
+		std::cout << "<E> TDetector::DivR(): too large harmonic number: " << iharm << " >= " << vHarmReco.size() << std::endl;
+	}
+}
+
+void TDetector::ResetHarm(){
+	for(uint16_t iharm=0; iharm<vHarmReco.size(); iharm++){
+		vHarmReco.at(iharm)->Reset();
+	}
+}
+
+void TDetector::Print(){
+	std::cout << "  <I> TDetector::Print(): Base:   " << type << " (" << minEta << ", " << maxEta << ") " << GetTotNch();
 }

@@ -80,7 +80,7 @@ CFLAGS	= -Wall -ggdb $(CXXFLAGS) $(LDFLAGS) $(ROOTCFLAGS) $(ROOTLDFLAGS) $(ROOTL
 #---------------=============== MAIN MAKEFILE ===============---------------
 CC		= g++
 TARGET	= aliFitFlowToy
-SOURCE	= aliFitFlowToy.cpp TDetector.cpp TEvent.cpp THarm.cpp THit.cpp TInputParams.cpp TInputCentralityClass.cpp cliParser.cpp cliParams.cpp
+SOURCE	= aliFitFlowToy.cpp DrawFuncs.cpp TCell.cpp TRing.cpp TDetector.cpp TEvent.cpp THarm.cpp THit.cpp TInputParams.cpp TInputCentralityClass.cpp cliParser.cpp cliParams.cpp
 
 INCLUDE	= -I./ $(AN_INCLUDE_DIR)  
 ## end more includes

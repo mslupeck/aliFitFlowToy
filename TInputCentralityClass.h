@@ -11,15 +11,18 @@
 #include <stdint.h>
 #include <vector>
 
+#include <TF1.h>
+
 using namespace std;
 
 class TInputCentralityClass {
 public:
-	uint32_t nPart;
+	TF1* fDnDEtaSim;
 	vector<double> vv;
 	vector<double> vdv;
 
-	TInputCentralityClass(uint32_t nPart);
+	TInputCentralityClass(TF1* fDnDEtaSim);
+	~TInputCentralityClass();
 };
 
 #endif /* TINPUTCENTRALITYCLASS_H_ */

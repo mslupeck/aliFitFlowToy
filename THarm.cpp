@@ -8,19 +8,21 @@
 #include "THarm.h"
 
 THarm::THarm() {
-	vSim = 0;
-	vReco = 0;
-	dvSim = 0;
-	psiSim = -1;
-	psiReco = -1;
+	Reset();
+}
+
+void THarm::Reset() {
+	v = 0;
+	dv = 0;
+	psi = -1;
 	qx = 0;
 	qy = 0;
 	r = 0;
-	fSim = NULL;
+	f = NULL;
 }
 
 THarm::~THarm() {
-	if(fSim != NULL){
-		delete fSim;
+	if(f != NULL){
+		delete f;
 	}
 }

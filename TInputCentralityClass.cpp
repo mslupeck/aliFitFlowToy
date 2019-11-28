@@ -7,7 +7,12 @@
 
 #include "TInputCentralityClass.h"
 
-TInputCentralityClass::TInputCentralityClass(uint32_t nPart) {
-	this->nPart = nPart;
+TInputCentralityClass::TInputCentralityClass(TF1* fDnDEtaSim) {
+	this->fDnDEtaSim = fDnDEtaSim;
 }
 
+TInputCentralityClass::~TInputCentralityClass() {
+	if(fDnDEtaSim != 0){
+		delete fDnDEtaSim;
+	}
+}

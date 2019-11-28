@@ -19,11 +19,14 @@
 #include <TPad.h>
 #include <TCanvas.h>
 #include <TH1D.h>
+#include <TH2D.h>
 #include <TF1.h>
 #include <TStyle.h>
+
 #include "THarm.h"
 #include "THit.h"
 #include "TInputParams.h"
+#include "TDetector.h"
 
 using namespace std;
 
@@ -32,31 +35,30 @@ private:
 	TRandom *rnd;
 	TInputParams *par;
 	int16_t iCentrality;
-	vector<THarm*> vHarm;
 	vector<THit*> vHit;
-	TF1* fNSim;
-	TF1* fNReco;
+	TF1* fDnDPhiSim;
+	TF1* fDnDPhiReco;
+	std::vector<THarm*> vHarmSim; // container for simulated flow parameters
+
 	void InitHarmonics();
 	void DestroyHarmonics();
-	void InitCentNames();
 
 public:
-
-	static double Round8Sectors(double phi);
-	static double Round16Sectors(double phi);
-	static double RoundToSectors(int nSectors, double phi);
-
 	TEvent(TInputParams *par, TRandom *rnd);
 	~TEvent();
-	void Simulate();
 	void Draw(uint16_t evn);
-	void ApplyGeometry(uint16_t nSectors);
-	void Reconstruct();
+	void Simulate();
+	void Transport(vector<TDetector*> &vDet);
+	void ReconstructR(vector<TDetector*> &vDet);     // Use basic method
+	void ReconstructRSub3(vector<TDetector*> &vDet); // Use 3-sub event method
+	void FillHistos(vector<TH1D*>& vh, vector<TH2D*> vh2, vector<TDetector*> &vDet);
+	void Reconstruct_old(vector<TDetector*> &vDet);
 	void SetCentrality(uint16_t i);
 
-	double GetR(uint16_t iharm) const;
+//	double GetR(uint16_t iharm) const;
 	const vector<THit*>& GetHit() const;
-	const vector<THarm*>& GetHarm() const;
+	const vector<THarm*>& GetHarmSim() const;
+	TInputParams* GetInputParams();
 };
 
 #endif /* TEVENT_H_ */
